@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>Mirror</title>
+		<style>
+			html, body {
+				height: 100%;
+				width: 100%;
+				margin: 0;
+				padding: 0;
+				background: black;
+				display: block;
+				overflow: hidden;
+			}
+			div {
+				margin: 0;
+				padding: 0;
+			}
+			#div_video {
+				display: flex;
+				justify-content:center;
+				align-items: center;
+				width: 100%;
+				height: 100%;
+			}
+			#video {
+				box-sizing: border-box;
+			}
+			div.controls {
+				position: absolute;
+				top: 1em;
+				left: 1em;
+				z-index: 10;
+				background: white;
+				border: 1px solid red;
+				padding: 1em;
+			}
+			#controls_stream {
+				display: none;
+			}
+			#controls_stream {
+				opacity: 0;
+				transition: opacity 0s 1s;
+			}
+			#controls_stream:hover {
+				opacity: 1;
+				transition: opacity 0s;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="controls" id="controls_start">
+			<button id="btn_start">Start Capture</button>
+		</div>	
+		<div class="controls" id="controls_stream">
+			<button id="btn_stop">Stop Capture</button>
+			Scale:
+			<select id="select_scale">
+				<option value="100" selected>100%</option>
+				<option value="fit">Fit</option>
+			</select>
+			<button id="btn_full_screen">Full Screen</button>
+			<button id="btn_freeze">Freeze</button>
+			<button id="btn_blank">Blank</button>
+		</div>
+
+		<div id="div_video">
+			<video id="video" autoplay></video>
+		</div>
+
+		<script>
+			const videoElem = document.getElementById("video");
+			const controlsStart = document.getElementById("controls_start");
+			const controlsStream = document.getElementById("controls_stream");
+			const btnStart = document.getElementById("btn_start");
+			const btnStop = document.getElementById("btn_stop");
+			const btnFullScreen = document.getElementById("btn_full_screen");
+			const selectScale = document.getElementById("select_scale");
+			const btnFreeze = document.getElementById("btn_freeze");
+			const btnBlank = document.getElementById("btn_blank");
+
+			if (location.hash === "#fit") {
+				selectScale.value = "fit";
+			}
+
+			const displayMediaOptions = {
+				video: {
+					displaySurface: "window",
+				},
+				audio: false,
+			};
+
+			btnStart.addEventListener(
+				"click",
+				(evt) => { startCapture(); },
+				false,
+			);
+
+			btnStop.addEventListener(
+				"click",
+				(evt) => { stopCapture(); },
+				false,
+			);
+
+			btnFullScreen.addEventListener(
+				"click",
+				(evt) => { videoElem.requestFullscreen(); },
+				false,
+			);
+
+			selectScale.addEventListener(
+				"change",
+				(evt) => { setScale(); },
+				false,
+			);
+
+			btnFreeze.addEventListener(
+				"click",
+				(evt) => {
+					if (videoElem.paused) {
+						videoElem.play();
+						videoElem.style.border = "none";
+					} else {
+						videoElem.pause();
+						videoElem.style.border = "5px solid red";
+					}
+				},
+				false,
+			);
+
+			btnBlank.addEventListener(
+				"click",
+				(evt) => {
+					videoElem.style.display =
+						(videoElem.style.display === "none") ? "initial" : "none";
+				},
+				false,
+			);
+
+			async function startCapture() {
+				try {
+					videoElem.srcObject =
+						await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+					setScale();
+					controlsStart.style.display = "none";
+					controlsStream.style.display = "initial";
+				} catch (err) {
+					console.error(err);
+				}
+			}
+
+			function stopCapture(evt) {
+				let tracks = videoElem.srcObject.getTracks();
+				tracks.forEach((track) => track.stop());
+				videoElem.srcObject = null;
+
+				controlsStart.style.display = "initial";
+				controlsStream.style.display = "none";
+				videoElem.style.border = "none";
+			}
+
+			function setScale(evt) {
+				switch (selectScale.value) {
+					case "100":
+						videoElem.style.width = "auto";
+						videoElem.style.height = "auto";
+			  			break;
+		  			case "fit":
+						videoElem.style.width = "100%";
+						videoElem.style.height = "100%";
+						break;
+					default:
+						console.error("Invalid scale option selected.");
+						break;
+				}
+			}
+		</script>
+	</body>
+</html>
