@@ -71,6 +71,7 @@
 
 		<script>
 			const videoElem = document.getElementById("video");
+			const body = document.getElementsByTagName("body")[0];
 			const controlsStart = document.getElementById("controls_start");
 			const controlsStream = document.getElementById("controls_stream");
 			const btnStart = document.getElementById("btn_start");
@@ -105,7 +106,7 @@
 
 			btnFullScreen.addEventListener(
 				"click",
-				(evt) => { videoElem.requestFullscreen(); },
+				(evt) => { body.requestFullscreen(); },
 				false,
 			);
 
